@@ -44,17 +44,29 @@ NODE_OPTIONS="--max-old-space-size=4096" npm run build
 
 ※ Three.jsは大きなライブラリのため、メモリを増やしてビルドする必要があります。
 
-## デプロイ (Vercel)
+## デプロイ (Cloudflare Pages)
 
 ### Web UIでデプロイ
 
-1. [Vercel](https://vercel.com)にアクセス
-2. GitHubアカウントでログイン
-3. 「New Project」をクリック
-4. `m0a/rubiks-cube` リポジトリを選択
-5. 「Deploy」をクリック
+1. [Cloudflare Dashboard](https://dash.cloudflare.com)にアクセス
+2. 「Workers & Pages」→「Create application」→「Pages」→「Connect to Git」
+3. GitHubアカウントで認証し、`m0a/rubiks-cube` リポジトリを選択
+4. ビルド設定:
+   - **Build command**: `NODE_OPTIONS='--max-old-space-size=4096' npm run build`
+   - **Build output directory**: `dist`
+   - **Framework preset**: Vite
+5. 「Save and Deploy」をクリック
 
-Vercelが自動的に `vercel.json` の設定を読み込んでビルドします。
+数分でデプロイが完了し、`*.pages.dev` のURLでアクセスできます。
+
+### Wrangler CLI でデプロイ（オプション）
+
+```bash
+npm install -g wrangler
+wrangler login
+npm run build
+wrangler pages deploy dist --project-name=rubiks-cube
+```
 
 ## 技術スタック
 
