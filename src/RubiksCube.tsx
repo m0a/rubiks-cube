@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import AnimatedCube from './AnimatedCube';
 import CameraController from './CameraController';
+import InteractionHandler from './InteractionHandler';
 import { createInitialCube, rotateFace, shuffleCube } from './cubeLogic';
 import type { CubeSize, Piece, Face, Direction } from './types';
 
@@ -14,7 +15,6 @@ const RubiksCube = () => {
   const [cameraRotation, setCameraRotation] = useState({ theta: Math.PI / 4, phi: Math.PI / 4 });
   const [isCameraAnimating, setIsCameraAnimating] = useState(false);
 
-  const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
   const pendingRotationRef = useRef<{ face: Face; direction: Direction } | null>(null);
 
   const handleSizeChange = (newSize: CubeSize) => {
@@ -76,48 +76,6 @@ const RubiksCube = () => {
 
   const handleCameraRotationComplete = () => {
     setIsCameraAnimating(false);
-  };
-
-  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    pointerDownPos.current = { x: event.clientX, y: event.clientY };
-  };
-
-  const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!pointerDownPos.current || isAnimating) return;
-
-    const deltaX = event.clientX - pointerDownPos.current.x;
-    const deltaY = event.clientY - pointerDownPos.current.y;
-    const threshold = 50;
-
-    if (Math.abs(deltaX) > threshold || Math.abs(deltaY) > threshold) {
-      // スワイプの方向に基づいて面と方向を決定
-      let face: Face;
-      let direction: Direction;
-
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        // 横スワイプ
-        if (deltaX > 0) {
-          face = 'right';
-          direction = 'clockwise';
-        } else {
-          face = 'left';
-          direction = 'clockwise';
-        }
-      } else {
-        // 縦スワイプ
-        if (deltaY > 0) {
-          face = 'bottom';
-          direction = 'clockwise';
-        } else {
-          face = 'top';
-          direction = 'clockwise';
-        }
-      }
-
-      handleRotate(face, direction);
-    }
-
-    pointerDownPos.current = null;
   };
 
   return (
@@ -342,11 +300,7 @@ const RubiksCube = () => {
       </div>
 
       {/* 3D Canvas */}
-      <div
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-        style={{ width: '100%', height: '100%', touchAction: 'none' }}
-      >
+      <div style={{ width: '100%', height: '100%', touchAction: 'none' }}>
         <Canvas camera={{ position: [5, 5, 5], fov: 50 }}>
           <ambientLight intensity={0.5} />
           <directionalLight position={[10, 10, 10]} intensity={1} />
@@ -364,6 +318,8 @@ const RubiksCube = () => {
             targetRotation={cameraRotation}
             onRotationComplete={handleCameraRotationComplete}
           />
+
+          <InteractionHandler onRotate={handleRotate} isAnimating={isAnimating} />
         </Canvas>
       </div>
     </div>
