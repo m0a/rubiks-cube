@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import CubePiece from './CubePiece';
+import AnimatedCube from './AnimatedCube';
 import { createInitialCube, rotateFace, shuffleCube } from './cubeLogic';
 import type { CubeSize, Piece, Face, Direction } from './types';
 
@@ -9,8 +9,11 @@ const RubiksCube = () => {
   const [size, setSize] = useState<CubeSize>(3);
   const [pieces, setPieces] = useState<Piece[]>(() => createInitialCube(3));
   const [isAnimating, setIsAnimating] = useState(false);
+  const [animatingFace, setAnimatingFace] = useState<Face | null>(null);
+  const [animatingDirection, setAnimatingDirection] = useState<Direction | null>(null);
 
   const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
+  const pendingRotationRef = useRef<{ face: Face; direction: Direction } | null>(null);
 
   const handleSizeChange = (newSize: CubeSize) => {
     setSize(newSize);
@@ -22,16 +25,26 @@ const RubiksCube = () => {
   };
 
   const handleShuffle = () => {
-    setIsAnimating(true);
     setPieces(shuffleCube(pieces, size, 20));
-    setTimeout(() => setIsAnimating(false), 100);
   };
 
   const handleRotate = (face: Face, direction: Direction) => {
     if (isAnimating) return;
     setIsAnimating(true);
-    setPieces(rotateFace(pieces, face, direction, size));
-    setTimeout(() => setIsAnimating(false), 300);
+    setAnimatingFace(face);
+    setAnimatingDirection(direction);
+    pendingRotationRef.current = { face, direction };
+  };
+
+  const handleAnimationComplete = () => {
+    if (pendingRotationRef.current) {
+      const { face, direction } = pendingRotationRef.current;
+      setPieces(rotateFace(pieces, face, direction, size));
+      pendingRotationRef.current = null;
+    }
+    setIsAnimating(false);
+    setAnimatingFace(null);
+    setAnimatingDirection(null);
   };
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -185,11 +198,13 @@ const RubiksCube = () => {
           <directionalLight position={[10, 10, 10]} intensity={1} />
           <directionalLight position={[-10, -10, -10]} intensity={0.5} />
 
-          <group>
-            {pieces.map((piece) => (
-              <CubePiece key={piece.id} piece={piece} size={1} />
-            ))}
-          </group>
+          <AnimatedCube
+            pieces={pieces}
+            size={size}
+            animatingFace={animatingFace}
+            animatingDirection={animatingDirection}
+            onAnimationComplete={handleAnimationComplete}
+          />
 
           <OrbitControls
             enablePan={false}
