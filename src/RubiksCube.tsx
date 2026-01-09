@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
 import AnimatedCube from './AnimatedCube';
+import CameraController from './CameraController';
 import { createInitialCube, rotateFace, shuffleCube } from './cubeLogic';
 import type { CubeSize, Piece, Face, Direction } from './types';
 
@@ -11,6 +11,8 @@ const RubiksCube = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [animatingFace, setAnimatingFace] = useState<Face | null>(null);
   const [animatingDirection, setAnimatingDirection] = useState<Direction | null>(null);
+  const [cameraRotation, setCameraRotation] = useState({ theta: Math.PI / 4, phi: Math.PI / 4 });
+  const [isCameraAnimating, setIsCameraAnimating] = useState(false);
 
   const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
   const pendingRotationRef = useRef<{ face: Face; direction: Direction } | null>(null);
@@ -45,6 +47,35 @@ const RubiksCube = () => {
     setIsAnimating(false);
     setAnimatingFace(null);
     setAnimatingDirection(null);
+  };
+
+  const handleCameraRotate = (direction: 'left' | 'right' | 'up' | 'down') => {
+    if (isCameraAnimating) return;
+    setIsCameraAnimating(true);
+
+    const step = Math.PI / 4; // 45度回転
+    const newRotation = { ...cameraRotation };
+
+    switch (direction) {
+      case 'left':
+        newRotation.theta -= step;
+        break;
+      case 'right':
+        newRotation.theta += step;
+        break;
+      case 'up':
+        newRotation.phi = Math.max(0.1, newRotation.phi - step);
+        break;
+      case 'down':
+        newRotation.phi = Math.min(Math.PI - 0.1, newRotation.phi + step);
+        break;
+    }
+
+    setCameraRotation(newRotation);
+  };
+
+  const handleCameraRotationComplete = () => {
+    setIsCameraAnimating(false);
   };
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -171,20 +202,134 @@ const RubiksCube = () => {
         </button>
       </div>
 
+      {/* 視点操作ボタン */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '20px',
+          right: '20px',
+          zIndex: 1000,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 50px)',
+          gridTemplateRows: 'repeat(3, 50px)',
+          gap: '5px',
+        }}
+      >
+        {/* 上 */}
+        <div style={{ gridColumn: '2', gridRow: '1' }}>
+          <button
+            onClick={() => handleCameraRotate('up')}
+            disabled={isCameraAnimating}
+            style={{
+              width: '100%',
+              height: '100%',
+              background: '#9C27B0',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: isCameraAnimating ? 'not-allowed' : 'pointer',
+              opacity: isCameraAnimating ? 0.5 : 1,
+              fontSize: '20px',
+            }}
+          >
+            ▲
+          </button>
+        </div>
+        {/* 左 */}
+        <div style={{ gridColumn: '1', gridRow: '2' }}>
+          <button
+            onClick={() => handleCameraRotate('left')}
+            disabled={isCameraAnimating}
+            style={{
+              width: '100%',
+              height: '100%',
+              background: '#9C27B0',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: isCameraAnimating ? 'not-allowed' : 'pointer',
+              opacity: isCameraAnimating ? 0.5 : 1,
+              fontSize: '20px',
+            }}
+          >
+            ◀
+          </button>
+        </div>
+        {/* 中央（視点リセット） */}
+        <div style={{ gridColumn: '2', gridRow: '2' }}>
+          <button
+            onClick={() => setCameraRotation({ theta: Math.PI / 4, phi: Math.PI / 4 })}
+            disabled={isCameraAnimating}
+            style={{
+              width: '100%',
+              height: '100%',
+              background: '#666',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: isCameraAnimating ? 'not-allowed' : 'pointer',
+              opacity: isCameraAnimating ? 0.5 : 1,
+              fontSize: '16px',
+            }}
+          >
+            ●
+          </button>
+        </div>
+        {/* 右 */}
+        <div style={{ gridColumn: '3', gridRow: '2' }}>
+          <button
+            onClick={() => handleCameraRotate('right')}
+            disabled={isCameraAnimating}
+            style={{
+              width: '100%',
+              height: '100%',
+              background: '#9C27B0',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: isCameraAnimating ? 'not-allowed' : 'pointer',
+              opacity: isCameraAnimating ? 0.5 : 1,
+              fontSize: '20px',
+            }}
+          >
+            ▶
+          </button>
+        </div>
+        {/* 下 */}
+        <div style={{ gridColumn: '2', gridRow: '3' }}>
+          <button
+            onClick={() => handleCameraRotate('down')}
+            disabled={isCameraAnimating}
+            style={{
+              width: '100%',
+              height: '100%',
+              background: '#9C27B0',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: isCameraAnimating ? 'not-allowed' : 'pointer',
+              opacity: isCameraAnimating ? 0.5 : 1,
+              fontSize: '20px',
+            }}
+          >
+            ▼
+          </button>
+        </div>
+      </div>
+
       {/* 操作説明 */}
       <div
         style={{
           position: 'absolute',
           bottom: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
+          left: '20px',
           zIndex: 1000,
           color: 'white',
-          textAlign: 'center',
           fontSize: '14px',
         }}
       >
-        画面をスワイプしてキューブを回転
+        <div>スワイプ: キューブ回転</div>
+        <div>矢印: 視点移動</div>
       </div>
 
       {/* 3D Canvas */}
@@ -206,11 +351,9 @@ const RubiksCube = () => {
             onAnimationComplete={handleAnimationComplete}
           />
 
-          <OrbitControls
-            enablePan={false}
-            enableZoom={true}
-            minDistance={3}
-            maxDistance={15}
+          <CameraController
+            targetRotation={cameraRotation}
+            onRotationComplete={handleCameraRotationComplete}
           />
         </Canvas>
       </div>
