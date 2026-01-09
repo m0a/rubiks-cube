@@ -78,54 +78,16 @@ const InteractionHandler = ({ onRotate, isAnimating }: InteractionHandlerProps) 
       face = point.y > 0 ? 'top' : 'bottom';
     }
 
-    // スワイプ方向から回転方向を決定
+    // スワイプ方向から回転方向を決定（シンプルな統一ルール）
     const isHorizontal = Math.abs(deltaX) > Math.abs(deltaY);
     let direction: Direction;
 
-    // 各面でのスワイプ方向と回転の対応を修正
-    switch (face) {
-      case 'front':
-        if (isHorizontal) {
-          direction = deltaX > 0 ? 'counterclockwise' : 'clockwise';
-        } else {
-          direction = deltaY < 0 ? 'clockwise' : 'counterclockwise';
-        }
-        break;
-      case 'back':
-        if (isHorizontal) {
-          direction = deltaX > 0 ? 'clockwise' : 'counterclockwise';
-        } else {
-          direction = deltaY < 0 ? 'counterclockwise' : 'clockwise';
-        }
-        break;
-      case 'left':
-        if (isHorizontal) {
-          direction = deltaX > 0 ? 'clockwise' : 'counterclockwise';
-        } else {
-          direction = deltaY < 0 ? 'clockwise' : 'counterclockwise';
-        }
-        break;
-      case 'right':
-        if (isHorizontal) {
-          direction = deltaX > 0 ? 'counterclockwise' : 'clockwise';
-        } else {
-          direction = deltaY < 0 ? 'clockwise' : 'counterclockwise';
-        }
-        break;
-      case 'top':
-        if (isHorizontal) {
-          direction = deltaX > 0 ? 'counterclockwise' : 'clockwise';
-        } else {
-          direction = deltaY < 0 ? 'counterclockwise' : 'clockwise';
-        }
-        break;
-      case 'bottom':
-        if (isHorizontal) {
-          direction = deltaX > 0 ? 'clockwise' : 'counterclockwise';
-        } else {
-          direction = deltaY < 0 ? 'clockwise' : 'counterclockwise';
-        }
-        break;
+    if (isHorizontal) {
+      // 横スワイプ: 右→時計回り、左→反時計回り
+      direction = deltaX > 0 ? 'clockwise' : 'counterclockwise';
+    } else {
+      // 縦スワイプ: 上→反時計回り、下→時計回り
+      direction = deltaY > 0 ? 'clockwise' : 'counterclockwise';
     }
 
     onRotate(face, direction);
