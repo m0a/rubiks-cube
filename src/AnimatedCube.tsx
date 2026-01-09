@@ -10,6 +10,9 @@ interface AnimatedCubeProps {
   animatingFace: Face | null;
   animatingDirection: Direction | null;
   onAnimationComplete: () => void;
+  isDragging: boolean;
+  draggingFace: Face | null;
+  currentRotation: number;
 }
 
 const AnimatedCube = ({
@@ -18,6 +21,9 @@ const AnimatedCube = ({
   animatingFace,
   animatingDirection,
   onAnimationComplete,
+  isDragging,
+  draggingFace,
+  currentRotation,
 }: AnimatedCubeProps) => {
   const rotatingGroupRef = useRef<Group>(null);
   const animationProgressRef = useRef(0);
@@ -31,17 +37,38 @@ const AnimatedCube = ({
   }, [animatingFace, animatingDirection]);
 
   useFrame((_, delta) => {
-    if (!isAnimatingRef.current || !rotatingGroupRef.current) return;
+    if (!rotatingGroupRef.current) return;
+
+    // ドラッグ中はリアルタイムで回転
+    if (isDragging && draggingFace) {
+      rotatingGroupRef.current.rotation.set(0, 0, 0);
+      switch (draggingFace) {
+        case 'front':
+        case 'back':
+          rotatingGroupRef.current.rotation.z = draggingFace === 'front' ? currentRotation : -currentRotation;
+          break;
+        case 'left':
+        case 'right':
+          rotatingGroupRef.current.rotation.x = draggingFace === 'right' ? currentRotation : -currentRotation;
+          break;
+        case 'top':
+        case 'bottom':
+          rotatingGroupRef.current.rotation.y = draggingFace === 'top' ? currentRotation : -currentRotation;
+          break;
+      }
+      return;
+    }
+
+    // アニメーション中
+    if (!isAnimatingRef.current) return;
     if (!animatingFace || !animatingDirection) return;
 
-    // アニメーション速度（1秒で90度回転）
     const speed = Math.PI / 2 / 0.3; // 0.3秒で90度
     animationProgressRef.current += delta * speed;
 
     const targetAngle = animatingDirection === 'clockwise' ? -Math.PI / 2 : Math.PI / 2;
     const currentAngle = Math.min(animationProgressRef.current, Math.abs(targetAngle)) * Math.sign(targetAngle);
 
-    // 回転軸を設定
     rotatingGroupRef.current.rotation.set(0, 0, 0);
     switch (animatingFace) {
       case 'front':
@@ -58,7 +85,6 @@ const AnimatedCube = ({
         break;
     }
 
-    // アニメーション完了チェック
     if (animationProgressRef.current >= Math.abs(targetAngle)) {
       isAnimatingRef.current = false;
       animationProgressRef.current = 0;
@@ -67,16 +93,17 @@ const AnimatedCube = ({
     }
   });
 
-  // 回転対象のピースを判定
+  // 回転対象のピースを判定（ドラッグ中またはアニメーション中）
   const offset = (size - 1) / 2;
   const rotatingPieces: Piece[] = [];
   const staticPieces: Piece[] = [];
+  const activeFace = isDragging ? draggingFace : animatingFace;
 
   pieces.forEach((piece) => {
     let shouldRotate = false;
 
-    if (animatingFace) {
-      switch (animatingFace) {
+    if (activeFace) {
+      switch (activeFace) {
         case 'front':
           shouldRotate = piece.position[2] === offset;
           break;

@@ -15,6 +15,11 @@ const RubiksCube = () => {
   const [cameraRotation, setCameraRotation] = useState({ theta: Math.PI / 4, phi: Math.PI / 4 });
   const [isCameraAnimating, setIsCameraAnimating] = useState(false);
 
+  // ドラッグ状態
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggingFace, setDraggingFace] = useState<Face | null>(null);
+  const [currentRotation, setCurrentRotation] = useState(0);
+
   const pendingRotationRef = useRef<{ face: Face; direction: Direction } | null>(null);
 
   const handleSizeChange = (newSize: CubeSize) => {
@@ -28,14 +33,6 @@ const RubiksCube = () => {
 
   const handleShuffle = () => {
     setPieces(shuffleCube(pieces, size, 20));
-  };
-
-  const handleRotate = (face: Face, direction: Direction) => {
-    if (isAnimating) return;
-    setIsAnimating(true);
-    setAnimatingFace(face);
-    setAnimatingDirection(direction);
-    pendingRotationRef.current = { face, direction };
   };
 
   const handleAnimationComplete = () => {
@@ -76,6 +73,40 @@ const RubiksCube = () => {
 
   const handleCameraRotationComplete = () => {
     setIsCameraAnimating(false);
+  };
+
+  const handleDragStart = (face: Face) => {
+    setIsDragging(true);
+    setDraggingFace(face);
+    setCurrentRotation(0);
+  };
+
+  const handleDrag = (rotation: number) => {
+    setCurrentRotation(rotation);
+  };
+
+  const handleDragEnd = () => {
+    if (!draggingFace) return;
+
+    setIsDragging(false);
+    setIsAnimating(true);
+
+    // 現在の回転量から最も近い90度の倍数を決定
+    const snapRotation = Math.round(currentRotation / (Math.PI / 2)) * (Math.PI / 2);
+    const direction: Direction = snapRotation >= 0 ? 'clockwise' : 'counterclockwise';
+
+    // 90度の倍数でない場合はスナップ
+    if (Math.abs(snapRotation) >= Math.PI / 4) {
+      setAnimatingFace(draggingFace);
+      setAnimatingDirection(direction);
+      pendingRotationRef.current = { face: draggingFace, direction };
+    } else {
+      // 回転量が小さい場合は元に戻す
+      setIsAnimating(false);
+      setCurrentRotation(0);
+    }
+
+    setDraggingFace(null);
   };
 
   return (
@@ -312,6 +343,9 @@ const RubiksCube = () => {
             animatingFace={animatingFace}
             animatingDirection={animatingDirection}
             onAnimationComplete={handleAnimationComplete}
+            isDragging={isDragging}
+            draggingFace={draggingFace}
+            currentRotation={currentRotation}
           />
 
           <CameraController
@@ -319,7 +353,12 @@ const RubiksCube = () => {
             onRotationComplete={handleCameraRotationComplete}
           />
 
-          <InteractionHandler onRotate={handleRotate} isAnimating={isAnimating} />
+          <InteractionHandler
+            onDragStart={handleDragStart}
+            onDrag={handleDrag}
+            onDragEnd={handleDragEnd}
+            isAnimating={isAnimating || isDragging}
+          />
         </Canvas>
       </div>
     </div>
