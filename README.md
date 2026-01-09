@@ -1,73 +1,70 @@
-# React + TypeScript + Vite
+# ルービックキューブ Web アプリ
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React Three FiberとThree.jsを使った、スマホで遊べるルービックキューブWebアプリです。
 
-Currently, two official plugins are available:
+## 特徴
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **2×2と3×3の両サイズ対応**: ボタンでサイズを切り替え可能
+- **スワイプ操作**: 画面をスワイプしてキューブを直感的に回転
+- **3D表示**: React Three Fiberによる美しい3Dレンダリング
+- **スマホ対応**: レスポンシブデザインでスマホでも快適にプレイ
 
-## React Compiler
+## 機能
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- リセット: キューブを初期状態に戻す
+- シャッフル: キューブをランダムに混ぜる
+- サイズ切替: 2×2と3×3を切り替え
+- OrbitControls: マウスやタッチでカメラを回転・ズーム
 
-## Expanding the ESLint configuration
+## 使い方
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. 画面を上下左右にスワイプしてキューブを回転
+2. ボタンでサイズを切り替えたり、リセット・シャッフル
+3. ピンチやマウスホイールでズーム
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 開発
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### セットアップ
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 開発サーバー起動
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+### ビルド
+
+```bash
+NODE_OPTIONS="--max-old-space-size=4096" npm run build
+```
+
+※ Three.jsは大きなライブラリのため、メモリを増やしてビルドする必要があります。
+
+## デプロイ (Vercel)
+
+### Web UIでデプロイ
+
+1. [Vercel](https://vercel.com)にアクセス
+2. GitHubアカウントでログイン
+3. 「New Project」をクリック
+4. `m0a/rubiks-cube` リポジトリを選択
+5. 「Deploy」をクリック
+
+Vercelが自動的に `vercel.json` の設定を読み込んでビルドします。
+
+## 技術スタック
+
+- React 19
+- TypeScript
+- Vite
+- Three.js
+- React Three Fiber
+- @react-three/drei
+
+## ライセンス
+
+MIT
