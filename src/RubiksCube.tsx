@@ -210,9 +210,9 @@ const RubiksCube = () => {
           right: '20px',
           zIndex: 1000,
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 50px)',
-          gridTemplateRows: 'repeat(3, 50px)',
-          gap: '5px',
+          gridTemplateColumns: 'repeat(3, 65px)',
+          gridTemplateRows: 'repeat(3, 65px)',
+          gap: '8px',
         }}
       >
         {/* 上 */}
@@ -226,10 +226,12 @@ const RubiksCube = () => {
               background: '#9C27B0',
               color: 'white',
               border: 'none',
-              borderRadius: '5px',
+              borderRadius: '8px',
               cursor: isCameraAnimating ? 'not-allowed' : 'pointer',
               opacity: isCameraAnimating ? 0.5 : 1,
-              fontSize: '20px',
+              fontSize: '28px',
+              fontWeight: 'bold',
+              touchAction: 'manipulation',
             }}
           >
             ▲
@@ -246,10 +248,12 @@ const RubiksCube = () => {
               background: '#9C27B0',
               color: 'white',
               border: 'none',
-              borderRadius: '5px',
+              borderRadius: '8px',
               cursor: isCameraAnimating ? 'not-allowed' : 'pointer',
               opacity: isCameraAnimating ? 0.5 : 1,
-              fontSize: '20px',
+              fontSize: '28px',
+              fontWeight: 'bold',
+              touchAction: 'manipulation',
             }}
           >
             ◀
@@ -266,10 +270,11 @@ const RubiksCube = () => {
               background: '#666',
               color: 'white',
               border: 'none',
-              borderRadius: '5px',
+              borderRadius: '8px',
               cursor: isCameraAnimating ? 'not-allowed' : 'pointer',
               opacity: isCameraAnimating ? 0.5 : 1,
-              fontSize: '16px',
+              fontSize: '24px',
+              touchAction: 'manipulation',
             }}
           >
             ●
@@ -286,10 +291,12 @@ const RubiksCube = () => {
               background: '#9C27B0',
               color: 'white',
               border: 'none',
-              borderRadius: '5px',
+              borderRadius: '8px',
               cursor: isCameraAnimating ? 'not-allowed' : 'pointer',
               opacity: isCameraAnimating ? 0.5 : 1,
-              fontSize: '20px',
+              fontSize: '28px',
+              fontWeight: 'bold',
+              touchAction: 'manipulation',
             }}
           >
             ▶
@@ -306,10 +313,12 @@ const RubiksCube = () => {
               background: '#9C27B0',
               color: 'white',
               border: 'none',
-              borderRadius: '5px',
+              borderRadius: '8px',
               cursor: isCameraAnimating ? 'not-allowed' : 'pointer',
               opacity: isCameraAnimating ? 0.5 : 1,
-              fontSize: '20px',
+              fontSize: '28px',
+              fontWeight: 'bold',
+              touchAction: 'manipulation',
             }}
           >
             ▼
